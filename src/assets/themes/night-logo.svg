@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="90" fill="#7b1fa2" opacity="0.1"/>
+  
+  <!-- 月亮形状 -->
+  <path d="M100,20 
+           A80,80 0 1,1 100,180 
+           A60,60 0 1,0 100,20" 
+        fill="none" 
+        stroke="#7b1fa2" 
+        stroke-width="4"/>
+  
+  <!-- 星星装饰 -->
+  <path d="M100,40 L105,50 L115,50 L107,57 L110,67 L100,62 L90,67 L93,57 L85,50 L95,50 Z" 
+        fill="#9c27b0"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="100" r="8" fill="#4a148c"/>
+  <circle cx="100" cy="40" r="4" fill="#9c27b0"/>
+  <circle cx="100" cy="160" r="4" fill="#9c27b0"/>
+  <circle cx="40" cy="100" r="4" fill="#9c27b0"/>
+  <circle cx="160" cy="100" r="4" fill="#9c27b0"/>
+</svg> 

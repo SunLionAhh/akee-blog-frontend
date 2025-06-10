@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="90" fill="#1e88e5" opacity="0.1"/>
+  
+  <!-- 六边形 -->
+  <polygon points="100,20 160,50 160,130 100,160 40,130 40,50" 
+           fill="none" 
+           stroke="#1e88e5" 
+           stroke-width="4"/>
+  
+  <!-- 内部电路图案 -->
+  <path d="M100,40 L100,80 M80,50 L120,50 M80,70 L120,70 M100,90 L100,130 M80,100 L120,100 M80,120 L120,120" 
+        stroke="#64b5f6" 
+        stroke-width="2"/>
+  
+  <!-- 中心点 -->
+  <circle cx="100" cy="100" r="8" fill="#0d47a1"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="40" r="4" fill="#64b5f6"/>
+  <circle cx="100" cy="160" r="4" fill="#64b5f6"/>
+  <circle cx="40" cy="100" r="4" fill="#64b5f6"/>
+  <circle cx="160" cy="100" r="4" fill="#64b5f6"/>
+</svg> 

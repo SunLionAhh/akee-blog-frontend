@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 外圈 -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#2e7d32" stroke-width="2"/>
+  
+  <!-- 装饰性叶子 -->
+  <path d="M100,30 
+           C120,40 130,60 130,80 
+           C130,100 120,120 100,130 
+           C80,120 70,100 70,80 
+           C70,60 80,40 100,30" 
+        fill="none" 
+        stroke="#81c784" 
+        stroke-width="1.5"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="100" r="6" fill="#1b5e20"/>
+  <circle cx="50" cy="50" r="4" fill="#2e7d32"/>
+  <circle cx="150" cy="50" r="4" fill="#2e7d32"/>
+  <circle cx="50" cy="150" r="4" fill="#2e7d32"/>
+  <circle cx="150" cy="150" r="4" fill="#2e7d32"/>
+  
+  <!-- 脉动动画效果 -->
+  <circle cx="100" cy="100" r="20" fill="none" stroke="#81c784" stroke-width="1" opacity="0.5">
+    <animate attributeName="r" values="20;40;20" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0;0.5" dur="4s" repeatCount="indefinite"/>
+  </circle>
+</svg> 

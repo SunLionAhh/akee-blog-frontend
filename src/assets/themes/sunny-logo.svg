@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="90" fill="#f57c00" opacity="0.1"/>
+  
+  <!-- 太阳形状 -->
+  <circle cx="100" cy="100" r="40" fill="none" stroke="#f57c00" stroke-width="4"/>
+  
+  <!-- 太阳光芒 -->
+  <path d="M100,20 L100,40 M100,160 L100,180 M20,100 L40,100 M160,100 L180,100" 
+        stroke="#ffb74d" 
+        stroke-width="3"/>
+  <path d="M40,40 L55,55 M145,145 L160,160 M40,160 L55,145 M145,55 L160,40" 
+        stroke="#ffb74d" 
+        stroke-width="3"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="100" r="8" fill="#e65100"/>
+  <circle cx="100" cy="40" r="4" fill="#ffb74d"/>
+  <circle cx="100" cy="160" r="4" fill="#ffb74d"/>
+  <circle cx="40" cy="100" r="4" fill="#ffb74d"/>
+  <circle cx="160" cy="100" r="4" fill="#ffb74d"/>
+</svg> 

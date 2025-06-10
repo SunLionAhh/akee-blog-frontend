@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="100" cy="100" r="90" fill="#e3f2fd"/>
+  
+  <!-- 眼睛 -->
+  <path d="M70 80 L80 90 L70 100" stroke="#2c3e50" stroke-width="4" fill="none"/>
+  <path d="M130 80 L120 90 L130 100" stroke="#2c3e50" stroke-width="4" fill="none"/>
+  
+  <!-- 眉毛 -->
+  <path d="M60 70 L80 70" stroke="#2c3e50" stroke-width="3" fill="none"/>
+  <path d="M120 70 L140 70" stroke="#2c3e50" stroke-width="3" fill="none"/>
+  
+  <!-- 嘴巴 -->
+  <path d="M90 120 L110 120" stroke="#2c3e50" stroke-width="3" fill="none"/>
+  
+  <!-- 装饰 -->
+  <path d="M40 60 L60 40" stroke="#4a90e2" stroke-width="4" fill="none"/>
+  <path d="M160 60 L140 40" stroke="#4a90e2" stroke-width="4" fill="none"/>
+</svg> 

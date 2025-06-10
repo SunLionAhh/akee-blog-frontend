@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 外圈 -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#7b1fa2" stroke-width="2"/>
+  
+  <!-- 星星装饰 -->
+  <path d="M100,30 L105,40 L115,40 L107,47 L110,57 L100,52 L90,57 L93,47 L85,40 L95,40 Z" 
+        fill="#9c27b0"/>
+  <path d="M70,70 L75,80 L85,80 L77,87 L80,97 L70,92 L60,97 L63,87 L55,80 L65,80 Z" 
+        fill="#9c27b0"/>
+  <path d="M130,70 L135,80 L145,80 L137,87 L140,97 L130,92 L120,97 L123,87 L115,80 L125,80 Z" 
+        fill="#9c27b0"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="100" r="6" fill="#4a148c"/>
+  <circle cx="50" cy="50" r="4" fill="#7b1fa2"/>
+  <circle cx="150" cy="50" r="4" fill="#7b1fa2"/>
+  <circle cx="50" cy="150" r="4" fill="#7b1fa2"/>
+  <circle cx="150" cy="150" r="4" fill="#7b1fa2"/>
+  
+  <!-- 闪烁动画效果 -->
+  <circle cx="100" cy="100" r="20" fill="none" stroke="#9c27b0" stroke-width="1" opacity="0.5">
+    <animate attributeName="r" values="20;40;20" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0;0.5" dur="5s" repeatCount="indefinite"/>
+  </circle>
+</svg> 

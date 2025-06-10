@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="90" fill="#2e7d32" opacity="0.1"/>
+  
+  <!-- 叶子形状 -->
+  <path d="M100,20 
+           C130,40 160,60 160,100 
+           C160,140 130,160 100,180 
+           C70,160 40,140 40,100 
+           C40,60 70,40 100,20" 
+        fill="none" 
+        stroke="#2e7d32" 
+        stroke-width="4"/>
+  
+  <!-- 叶脉 -->
+  <path d="M100,20 L100,180 M70,40 L130,160 M70,160 L130,40" 
+        stroke="#81c784" 
+        stroke-width="2"/>
+  
+  <!-- 装饰性圆点 -->
+  <circle cx="100" cy="100" r="8" fill="#1b5e20"/>
+  <circle cx="100" cy="40" r="4" fill="#81c784"/>
+  <circle cx="100" cy="160" r="4" fill="#81c784"/>
+  <circle cx="40" cy="100" r="4" fill="#81c784"/>
+  <circle cx="160" cy="100" r="4" fill="#81c784"/>
+</svg> 
