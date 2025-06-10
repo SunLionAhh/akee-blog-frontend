@@ -38,29 +38,50 @@
               <h2>最新文章</h2>
               <el-button type="text">查看全部 <i class="el-icon-arrow-right"></i></el-button>
             </div>
-            <el-card v-loading="loading" class="post-card" :body-style="{ padding: '0' }" v-for="(post, idx) in posts" :key="idx">
+            <el-card v-loading="loading" class="post-card" :body-style="{ padding: '0', borderRadius: '8px' }" v-for="(post, idx) in posts" :key="idx">
               <div class="post-content-wrapper">
-                
-                <div class="post-content">
-                  <h2>{{ post.title }}</h2>
-                  <p class="post-meta">
-                    <span><i class="el-icon-user"></i> {{ post.authorName }}</span>
-                    <span><i class="el-icon-date"></i> {{ formatDate(post.createdAt) }}</span>
-                    <span><i class="el-icon-view"></i> {{ post.viewCount }} 阅读</span>
-                  </p>
-                  <div class="post-cover">
-                  <img :src="getArticleCoverUrl(post.coverImage)" alt="cover" />
+                <!-- 封面图片区域 -->
+                <div class="post-cover" @click="goToPost(post.id)">
+                  <img :src="post.coverImage || '/default-cover.jpg'" alt="cover" />
                   <div class="post-category">
-                    <el-tag size="small">{{ post.categoryName }}</el-tag>
+                    <el-tag size="small" effect="dark" :color="post.categoryColor">{{ post.categoryName }}</el-tag>
                   </div>
-                  <p class="post-desc">{{ post.summary }}</p>
                 </div>
+                
+                <!-- 内容区域 -->
+                <div class="post-content">
+                  <h2 class="post-title" @click="goToPost(post.id)">{{ post.title }}</h2>
                   
-                  <div class="post-footer">
-                    <div class="post-tags">
-                      <el-tag v-for="tag in post.tagNames" :key="tag" size="small" effect="plain">{{ tag }}</el-tag>
-                    </div>
-                    <el-button type="text" @click="goToPost(post.id)">阅读全文 <i class="el-icon-arrow-right"></i></el-button>
+                  <div class="post-meta">
+                    <span class="post-author">
+                      <i class="el-icon-user"></i>
+                      {{ post.authorName }}
+                    </span>
+                    <span class="post-date">
+                      <i class="el-icon-date"></i>
+                      {{ formatDate(post.createdAt) }}
+                    </span>
+                    <span class="post-views">
+                      <i class="el-icon-view"></i>
+                      {{ post.viewCount }}
+                    </span>
+                    <span class="post-likes">
+                      <i class="el-icon-star-on"></i>
+                      {{ post.likeCount }}
+                    </span>
+                  </div>
+                  
+                  <div class="post-summary">{{ post.summary }}</div>
+                  
+                  <div class="post-tags">
+                    <el-tag
+                      v-for="tag in post.tagNames"
+                      :key="tag"
+                      size="small"
+                      @click="filterByTag(tag)"
+                      class="post-tag">
+                      {{ tag }}
+                    </el-tag>
                   </div>
                 </div>
               </div>
@@ -73,7 +94,7 @@
                   :total="total"
                   :page-size="pageSize"
                   :current-page.sync="currentPage"
-                  @current-change="handlePageChange"
+                  @current-change="handleCurrentChange"
               ></el-pagination>
             </div>
           </el-col>
@@ -106,10 +127,13 @@
             <el-card class="sidebar-card">
               <div slot="header" class="card-header">
                 <span>文章分类</span>
-                <el-button type="text">查看全部</el-button>
+                <el-button type="text" @click="goToCategories">查看全部</el-button>
               </div>
               <div class="category-list">
-                <div v-for="cat in categories" :key="cat.id" class="category-item">
+                <div v-for="cat in categories" :key="cat.id" 
+                     class="category-item" 
+                     :class="{ active: selectedCategory === cat.name }"
+                     @click="filterByCategory(cat.name)">
                   <span class="category-name">{{ cat.name }}</span>
                   <el-tag size="small" type="info">{{ cat.postCount }}</el-tag>
                 </div>
@@ -119,14 +143,17 @@
             <el-card class="sidebar-card">
               <div slot="header" class="card-header">
                 <span>热门标签</span>
-                <el-button type="text">查看全部</el-button>
+                <el-button type="text" @click="goToTags">查看全部</el-button>
               </div>
               <div class="tag-cloud">
-                <el-tag v-for="tag in tags" :key="tag.id"
-                        :type="getRandomTagType()"
+                <el-tag v-for="tag in tags" 
+                        :key="tag.id"
+                        :type="selectedTag === tag.name ? 'primary' : 'info'"
                         effect="light"
-                        class="tag-item">
+                        class="tag-item"
+                        @click="filterByTag(tag.name)">
                   {{ tag.name }}
+                  <span class="tag-count">({{ tag.postCount }})</span>
                 </el-tag>
               </div>
             </el-card>
@@ -155,7 +182,9 @@ export default {
       pageSize: 10,
       total: 0,
       avatarSrc: avatarImg,
-      baseUploadUrl: 'http://localhost:8080/uploads/' // 图片上传的基础URL
+      baseUploadUrl: 'http://localhost:8080/uploads/', // 图片上传的基础URL
+      selectedCategory: '',
+      selectedTag: '',
     }
   },
   methods: {
@@ -179,20 +208,29 @@ export default {
     },
     async fetchPosts() {
       try {
-        const response = await postApi.getPosts({
+        const params = {
           page: this.currentPage - 1,
           size: this.pageSize
-        })
+        };
+        
+        if (this.selectedCategory) {
+          params.category = this.selectedCategory;
+        }
+        if (this.selectedTag) {
+          params.tag = this.selectedTag;
+        }
+
+        const response = await postApi.getPosts(params);
         this.posts = response.data.content.map(post => ({
           ...post,
           categoryName: post.category?.name || '未分类',
           authorName: post.author?.username || '未知作者',
           tagNames: post.tags?.map(tag => tag.name) || []
-        }))
-        this.total = response.data.totalElements
+        }));
+        this.total = response.data.totalElements;
       } catch (error) {
-        console.error('获取文章列表失败:', error)
-        this.$message.error('获取文章列表失败')
+        console.error('获取文章列表失败:', error);
+        this.$message.error('获取文章列表失败');
       }
     },
     async fetchCategories() {
@@ -243,7 +281,7 @@ export default {
       const types = ['', 'success', 'info', 'warning', 'danger']
       return types[Math.floor(Math.random() * types.length)]
     },
-    async handlePageChange(page) {
+    async handleCurrentChange(page) {
       this.currentPage = page
       console.log('开始加载分页数据，设置 loading = true')
       this.loading = true
@@ -254,7 +292,25 @@ export default {
         console.log('设置 loading = false')
         this.loading = false
       }
-    }
+    },
+    async filterByCategory(category) {
+      this.selectedCategory = category;
+      this.selectedTag = '';
+      this.currentPage = 1;
+      await this.fetchPosts();
+    },
+    async filterByTag(tag) {
+      this.selectedTag = tag;
+      this.selectedCategory = '';
+      this.currentPage = 1;
+      await this.fetchPosts();
+    },
+    goToCategories() {
+      this.$router.push('/categories');
+    },
+    goToTags() {
+      this.$router.push('/tags');
+    },
   },
   created() {
     this.fetchAllData()
@@ -397,105 +453,115 @@ export default {
 }
 
 .post-card {
-  margin-bottom: 30px;
-  border-radius: 12px;
-  overflow: hidden;
+  margin-bottom: 24px;
+  border-radius: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: none;
 }
 
 .post-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .post-content-wrapper {
   display: flex;
-  min-height: 200px;
+  flex-direction: column;
 }
 
 .post-cover {
   position: relative;
-  width: 300px;
-  min-width: 300px;
-  height: 0;
-  padding-bottom: 56.25%; /* 高:宽=9:16 比例 (9/16 = 0.5625) */
+  height: 200px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .post-cover img {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.5s ease;
 }
 
-.post-card:hover .post-cover img {
+.post-cover:hover img {
   transform: scale(1.05);
 }
 
 .post-category {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 15px;
+  right: 15px;
 }
 
 .post-content {
-  flex: 1;
-  padding: 24px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
 }
 
-.post-content h2 {
-  margin: 0 0 16px 0;
-  font-size: 24px;
-  color: var(--primary-color);
+.post-title {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.post-title:hover {
+  color: #409EFF;
 }
 
 .post-meta {
   display: flex;
-  gap: 16px;
-  color: #888;
-  font-size: 14px;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 0 0 15px 0;
+  color: #909399;
+  font-size: 0.9rem;
 }
 
 .post-meta span {
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
-.post-desc {
+.post-meta i {
+  margin-right: 5px;
+}
+
+.post-summary {
   color: #666;
-  font-size: 16px;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin: 0 0 15px 0;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
+  text-overflow: ellipsis;
 }
 
 .post-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
-  padding-top: 20px;
-  border-top: 1px dashed var(--secondary-color);
+  margin-top: 15px;
 }
 
 .post-tags {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-tag {
+  transition: all 0.3s;
+}
+
+.post-tag:hover {
+  transform: translateY(-2px);
+}
+
+.read-more-btn {
+  padding: 8px 15px;
 }
 
 .sidebar-card {
@@ -565,12 +631,26 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--secondary-color);
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.category-item:last-child {
-  border-bottom: none;
+.category-item:hover {
+  background: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.category-item.active {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.category-item.active .el-tag {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: transparent;
+  color: #fff;
 }
 
 .category-name {
@@ -581,15 +661,22 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 12px 16px;
 }
 
 .tag-item {
-  margin: 4px;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .tag-item:hover {
   transform: scale(1.05);
+}
+
+.tag-count {
+  font-size: 12px;
+  margin-left: 4px;
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {
@@ -618,8 +705,25 @@ export default {
   }
   
   .post-cover {
+    height: 180px;
+  }
+  
+  .post-title {
+    font-size: 1.3rem;
+  }
+  
+  .post-meta {
+    gap: 10px;
+  }
+  
+  .post-footer {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .read-more-btn {
     width: 100%;
-    padding-bottom: 56.25%; /* 保持高:宽=9:16比例 */
   }
 }
 
