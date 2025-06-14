@@ -221,13 +221,13 @@ export default {
         }
 
         const response = await postApi.getPosts(params);
-        this.posts = response.data.content.map(post => ({
+        this.posts = response.records.map(post => ({
           ...post,
           categoryName: post.category?.name || '未分类',
           authorName: post.author?.username || '未知作者',
-          tagNames: post.tags?.map(tag => tag.name) || []
+          tagNames: post.tag?.map(tag => tag.name) || []
         }));
-        this.total = response.data.totalElements;
+        this.total = response.total;
       } catch (error) {
         console.error('获取文章列表失败:', error);
         this.$message.error('获取文章列表失败');
@@ -236,7 +236,7 @@ export default {
     async fetchCategories() {
       try {
         const response = await categoryApi.getCategories()
-        this.categories = response.data
+        this.categories = response
       } catch (error) {
         console.error('获取分类列表失败:', error)
         this.$message.error('获取分类列表失败')
@@ -248,72 +248,40 @@ export default {
           page: 0,
           size: 20  // 获取前20个标签
         })
-        this.tags = response.data.content.map(tag => ({
-          id: tag.id,
-          name: tag.name
-        }))
+        this.tags = response.records
       } catch (error) {
         console.error('获取标签列表失败:', error)
         this.$message.error('获取标签列表失败')
       }
     },
-    async fetchAllData() {
-      console.log('开始加载数据，设置 loading = true')
-      this.loading = true
-      try {
-        await Promise.all([
-          this.fetchPosts(),
-          this.fetchCategories(),
-          this.fetchTags()
-        ])
-        console.log('数据加载完成')
-      } catch (error) {
-        console.error('加载数据失败:', error)
-      } finally {
-        console.log('设置 loading = false')
-        this.loading = false
-      }
+    handleCurrentChange(newPage) {
+      this.currentPage = newPage;
+      this.fetchPosts();
     },
     goToPost(id) {
-      this.$router.push(`/post/${id}`)
+      this.$router.push(`/post/${id}`);
     },
-    getRandomTagType() {
-      const types = ['', 'success', 'info', 'warning', 'danger']
-      return types[Math.floor(Math.random() * types.length)]
+    filterByCategory(categoryName) {
+      this.selectedCategory = this.selectedCategory === categoryName ? '' : categoryName;
+      this.currentPage = 1; // 过滤时重置页码
+      this.fetchPosts();
     },
-    async handleCurrentChange(page) {
-      this.currentPage = page
-      console.log('开始加载分页数据，设置 loading = true')
-      this.loading = true
-      try {
-        await this.fetchPosts()
-        console.log('分页数据加载完成')
-      } finally {
-        console.log('设置 loading = false')
-        this.loading = false
-      }
-    },
-    async filterByCategory(category) {
-      this.selectedCategory = category;
-      this.selectedTag = '';
-      this.currentPage = 1;
-      await this.fetchPosts();
-    },
-    async filterByTag(tag) {
-      this.selectedTag = tag;
-      this.selectedCategory = '';
-      this.currentPage = 1;
-      await this.fetchPosts();
+    filterByTag(tagName) {
+      this.selectedTag = this.selectedTag === tagName ? '' : tagName;
+      this.currentPage = 1; // 过滤时重置页码
+      this.fetchPosts();
     },
     goToCategories() {
       this.$router.push('/categories');
     },
     goToTags() {
       this.$router.push('/tags');
-    },
+    }
   },
   created() {
-    this.fetchAllData()
+    this.fetchPosts();
+    this.fetchCategories();
+    this.fetchTags();
   }
 }
 </script>

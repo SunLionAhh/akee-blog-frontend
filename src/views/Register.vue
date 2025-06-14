@@ -93,7 +93,7 @@ export default {
         }, 1000)
         this.$message.success('验证码已发送到您的邮箱')
       } catch (error) {
-        this.$message.error(error.response?.data?.message || '发送验证码失败')
+        this.$message.error(error.message || '发送验证码失败')
       }
     },
     async handleRegister() {
@@ -109,7 +109,7 @@ export default {
             this.$message.success('注册成功')
             this.$router.push('/login')
           } catch (error) {
-            this.$message.error(error.response?.data?.message || '注册失败')
+            this.$message.error(error.message || '注册失败')
           }
         }
       })

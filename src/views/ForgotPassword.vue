@@ -30,10 +30,10 @@ export default {
     async handleSubmit() {
       try {
         const response = await authService.forgotPassword({ email: this.email })
-        this.$message.success(response.data)
+        this.$message.success(response)
         this.email = '' // 清空邮箱
       } catch (error) {
-        this.$message.error(error.response.data.message || '发送重置链接失败')
+        this.$message.error(error.message || '发送重置链接失败')
       }
     },
   },

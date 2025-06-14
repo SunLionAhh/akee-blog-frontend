@@ -17,6 +17,7 @@
     <el-menu-item index="/categories">分类</el-menu-item>
     <el-menu-item index="/tags">标签</el-menu-item>
     <el-menu-item index="/about">关于</el-menu-item>
+    <el-menu-item index="/debugging_summary.html">技术总结</el-menu-item>
     <div class="right-menu">
       <el-dropdown @command="handleThemeChange" class="theme-switch">
         <span class="el-dropdown-link">
@@ -45,10 +46,6 @@
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-      </template>
-      <template v-else>
-        <el-button type="text" @click="goToLogin">登录</el-button>
-        <el-button type="primary" @click="goToRegister">注册</el-button>
       </template>
     </div>
   </el-menu>
@@ -83,12 +80,6 @@ export default {
     }
   },
   methods: {
-    goToLogin() {
-      this.$router.push('/login')
-    },
-    goToRegister() {
-      this.$router.push('/register')
-    },
     goToProfile() {
       this.$router.push('/profile')
     },

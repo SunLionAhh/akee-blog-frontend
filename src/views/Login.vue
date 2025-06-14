@@ -71,7 +71,7 @@ export default {
             this.$message.success('登录成功')
             this.$router.push('/')
           } catch (error) {
-            this.$message.error(error.response?.data?.message || '登录失败')
+            this.$message.error(error.message || '登录失败')
           }
         }
       })

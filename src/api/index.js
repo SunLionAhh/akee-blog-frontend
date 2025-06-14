@@ -32,8 +32,15 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   response => {
-    // 保持原始响应结构
-    return response
+    // 检查后端返回的 code
+    if (response.data.code === 200) {
+      return response.data.data // 返回实际的数据部分
+    } else {
+      // 如果 code 不为 200，表示有业务错误
+      console.error('API Error:', response.data.message)
+      // 可以选择抛出错误，让调用者捕获，或者返回一个 Promise.reject
+      return Promise.reject(new Error(response.data.message || '未知错误'))
+    }
   },
   error => {
     // 对响应错误做点什么
@@ -163,6 +170,30 @@ export const userApi = {
   // 更新用户信息
   updateUserInfo(data) {
     return api.put('/user/info', data)
+  }
+}
+
+// 评论相关 API
+export const commentApi = {
+  // 获取文章评论
+  getCommentsByPost(postId, params) {
+    return api.get(`/comments/post/${postId}`, { params })
+  },
+  // 创建评论
+  createComment(data) {
+    return api.post('/comments', data)
+  },
+  // 更新评论
+  updateComment(id, data) {
+    return api.put(`/comments/${id}`, data)
+  },
+  // 删除评论
+  deleteComment(id) {
+    return api.delete(`/comments/${id}`)
+  },
+  // 获取评论回复
+  getReplies(commentId, params) {
+    return api.get(`/comments/${commentId}/replies`, { params })
   }
 }
 

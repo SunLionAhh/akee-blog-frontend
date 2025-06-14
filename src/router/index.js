@@ -59,6 +59,14 @@ const routes = [
     meta: {
       title: '关于我'
     }
+  },
+  {
+    path: '/debugging_summary.html',
+    name: 'DebuggingSummary',
+    component: () => import('../views/DebuggingSummary.vue'),
+    meta: {
+      title: '技术总结'
+    }
   }
 ]
 

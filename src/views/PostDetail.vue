@@ -6,7 +6,7 @@
         <h1>{{ post.title }}</h1>
         <div class="post-meta">
           <span class="author">
-            <el-avatar :size="24" :src="post.avatar"></el-avatar>
+            <el-avatar :size="24" :src="authorAvatarUrl"></el-avatar>
             {{ post.author }}
           </span>
           <span class="date"><i class="el-icon-date"></i> {{ post.date }}</span>
@@ -111,7 +111,7 @@
             <el-card class="author-card">
               <div class="author-info">
                 <div class="avatar-wrapper">
-                  <el-avatar :size="80" :src="post.avatar"></el-avatar>
+                  <el-avatar :size="80" :src="authorAvatarUrl"></el-avatar>
                   <img class="theme-decoration" :src="currentTheme.logo" alt="theme decoration" />
                 </div>
                 <h3>{{ post.author }}</h3>
@@ -161,106 +161,143 @@
 </template>
 
 <script>
+import { postApi, commentApi } from '@/api'
+
 export default {
   name: 'PostDetail',
   inject: ['currentTheme'],
   data() {
     return {
-      post: {
-        id: 1,
-        title: '第一篇博客文章',
-        author: 'Akee',
-        avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-        authorDesc: '热爱编程和分享的开发者',
-        date: '2024-05-18',
-        views: 1234,
-        category: '前端',
-        tags: ['Vue', 'JavaScript'],
-        content: `
-          <h2>引言</h2>
-          <p>这是我的第一篇博客文章，欢迎大家阅读和交流！在这里，我将分享我的编程经验和学习心得。</p>
-          
-          <h2>正文</h2>
-          <p>在开始之前，我想先介绍一下我自己。我是一名热爱编程的开发者，主要专注于前端开发领域。</p>
-          
-          <h3>为什么写博客？</h3>
-          <p>写博客不仅可以帮助我整理和总结知识，还能与更多的开发者交流学习。通过分享，我们可以共同进步。</p>
-          
-          <h3>技术栈</h3>
-          <ul>
-            <li>前端：Vue.js, React, TypeScript</li>
-            <li>后端：Node.js, Java</li>
-            <li>数据库：MySQL, MongoDB</li>
-          </ul>
-          
-          <h2>结语</h2>
-          <p>希望这篇文章对你有帮助，也欢迎大家在评论区留言交流！</p>
-        `,
-        prev: null,
-        next: {
-          id: 2,
-          title: '前端开发入门指南'
-        }
-      },
-      comments: [
-        {
-          id: 1,
-          author: '张三',
-          avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-          date: '2024-05-18 14:30',
-          content: '写得很好，期待更多分享！'
-        },
-        {
-          id: 2,
-          author: '李四',
-          avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-          date: '2024-05-18 15:45',
-          content: '学习了，感谢分享！'
-        }
-      ],
-      relatedPosts: [
-        {
-          id: 2,
-          title: '前端开发入门指南',
-          cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80',
-          views: 2345,
-          date: '2024-05-17'
-        },
-        {
-          id: 3,
-          title: 'Java 后端实战',
-          cover: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-          views: 3456,
-          date: '2024-05-16'
-        }
-      ],
+      post: {},
+      comments: [],
+      relatedPosts: [], // Related posts can be fetched or managed separately
       showCommentForm: false,
-      newComment: ''
+      newComment: '',
+      baseUploadUrl: 'http://localhost:8080/uploads/', // 图片上传的基础URL
+    }
+  },
+  computed: {
+    // 动态生成作者头像URL
+    authorAvatarUrl() {
+      if (this.post.authorAvatar) {
+        return this.post.authorAvatar.startsWith('http') ? this.post.authorAvatar : `${this.baseUploadUrl}${this.post.authorAvatar}`;
+      }
+      return 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'; // 默认头像
+    },
+  },
+  watch: {
+    '$route.params.id': {
+      immediate: true,
+      handler(newId) {
+        if (newId) {
+          this.fetchPostDetail(newId);
+          this.fetchComments(newId);
+        }
+      }
+    },
+    '$root.$data.currentTheme': {
+      handler(newTheme) {
+        this.currentTheme = newTheme
+      },
+      immediate: true
     }
   },
   methods: {
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('zh-CN', options);
+    },
+    async fetchPostDetail(id) {
+      try {
+        const response = await postApi.getPost(id);
+        this.post = {
+          ...response,
+          author: response.author?.username || '未知作者',
+          avatar: response.author?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png', // 默认头像
+          category: response.category?.name || '未分类',
+          tags: response.tags?.map(tag => tag.name) || [],
+          date: this.formatDate(response.createTime),
+          views: response.viewCount,
+          // prev 和 next 暂时从后端获取，如果后端没有提供，可以移除或另行处理
+          prev: response.prevPost || null,
+          next: response.nextPost || null,
+        };
+        // 增加文章浏览量
+        await postApi.incrementViewCount(id);
+      } catch (error) {
+        console.error('获取文章详情失败:', error);
+        this.$message.error('获取文章详情失败');
+        this.post = {}; // 清空文章数据
+      }
+    },
+    async fetchComments(postId, page = 1, size = 10) {
+      try {
+        const response = await commentApi.getCommentsByPost(postId, { current: page, size });
+        this.comments = response.records.map(comment => ({
+          ...comment,
+          author: comment.username || '匿名用户',
+          avatar: comment.userAvatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png', // 默认头像
+          date: this.formatDate(comment.createdAt),
+        }));
+      } catch (error) {
+        console.error('获取评论失败:', error);
+        this.$message.error('获取评论失败');
+        this.comments = [];
+      }
+    },
     goToPost(id) {
       this.$router.push(`/post/${id}`);
     },
-    handleLike() {
-      // 处理收藏
+    async handleLike() {
+      try {
+        await postApi.incrementLikeCount(this.post.id);
+        this.post.likeCount = (this.post.likeCount || 0) + 1; // 更新前端显示
+        this.$message.success('点赞成功！');
+      } catch (error) {
+        console.error('点赞失败:', error);
+        this.$message.error(error.message || '点赞失败！');
+      }
     },
     handleShare() {
-      // 处理分享
+      // 处理分享功能，例如复制链接到剪贴板
+      const shareUrl = window.location.href;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        this.$message.success('文章链接已复制到剪贴板！');
+      }).catch(err => {
+        console.error('复制失败:', err);
+        this.$message.error('复制链接失败！');
+      });
+    },
+    async submitComment() {
+      if (!this.newComment.trim()) {
+        this.$message.warning('评论内容不能为空');
+        return;
+      }
+      try {
+        const newCommentData = {
+          postId: this.post.id,
+          content: this.newComment,
+          // parentId: if it's a reply
+        };
+        await commentApi.createComment(newCommentData);
+        this.$message.success('评论发表成功！');
+        this.newComment = '';
+        this.showCommentForm = false;
+        this.fetchComments(this.post.id); // 重新加载评论以显示新评论
+      } catch (error) {
+        console.error('发表评论失败:', error);
+        this.$message.error(error.message || '发表评论失败！');
+      }
     },
     handleReply(comment) {
-      // 处理回复
+      // 可以在这里设置回复的目标评论ID或用户，然后显示评论表单
+      this.$message.info(`回复功能待实现：回复给 ${comment.author}`);
       this.showCommentForm = true;
-      this.newComment = `@${comment.author} `;
     },
     handleLikeComment(comment) {
-      // 处理评论点赞
-      this.$message.success(`点赞了 ${comment.author} 的评论`);
-    },
-    submitComment() {
-      // 提交评论
-      this.showCommentForm = false;
-      this.newComment = '';
+      this.$message.info(`评论点赞功能待实现：评论ID ${comment.id}`);
+      // 实现评论点赞的API调用
     }
   },
   created() {
@@ -268,15 +305,6 @@ export default {
     const savedTheme = localStorage.getItem('theme')
     if (savedTheme) {
       this.currentTheme = JSON.parse(savedTheme)
-    }
-  },
-  watch: {
-    // 监听主题变化
-    '$root.$data.currentTheme': {
-      handler(newTheme) {
-        this.currentTheme = newTheme
-      },
-      immediate: true
     }
   }
 }

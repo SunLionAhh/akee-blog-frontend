@@ -54,10 +54,10 @@ export default {
           token: this.token,
           newPassword: this.newPassword,
         })
-        this.$message.success(response.data)
+        this.$message.success(response)
         this.$router.push('/login') // 重置成功后跳转到登录页
       } catch (error) {
-        this.$message.error(error.response.data.message || '重置密码失败')
+        this.$message.error(error.message || '重置密码失败')
       }
     },
   },

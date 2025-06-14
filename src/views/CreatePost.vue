@@ -88,7 +88,7 @@
 <script>
 import { mavonEditor } from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-import axios from 'axios'
+import { postApi, categoryApi, tagApi } from '@/api'
 
 export default {
   name: 'CreatePost',
@@ -163,24 +163,24 @@ export default {
   methods: {
     async fetchCategories() {
       try {
-        const response = await axios.get('/api/categories')
-        this.categories = response.data
+        const response = await categoryApi.getCategories()
+        this.categories = response
       } catch (error) {
         this.$message.error('获取分类列表失败')
       }
     },
     async fetchTags() {
       try {
-        const response = await axios.get('/api/tags')
-        this.tags = response.data
+        const response = await tagApi.getTags()
+        this.tags = response.records
       } catch (error) {
         this.$message.error('获取标签列表失败')
       }
     },
     async fetchPost() {
       try {
-        const response = await axios.get(`/api/posts/${this.postId}`)
-        const post = response.data
+        const response = await postApi.getPost(this.postId)
+        const post = response
         this.postForm = {
           title: post.title,
           content: post.content,
@@ -218,10 +218,10 @@ export default {
         if (valid) {
           try {
             if (this.isEdit) {
-              await axios.put(`/api/posts/${this.postId}`, this.postForm)
+              await postApi.updatePost(this.postId, this.postForm)
               this.$message.success('文章更新成功')
             } else {
-              await axios.post('/api/posts', this.postForm)
+              await postApi.createPost(this.postForm)
               this.$message.success('文章创建成功')
             }
             this.$router.push('/')
